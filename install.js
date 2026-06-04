@@ -12,17 +12,6 @@ module.exports = {
       }
     },
     {
-      method: "script.start",
-      params: {
-        uri: "torch.js",
-        params: {
-          venv: "env",
-          path: "app",
-          // xformers: true
-        }
-      }
-    },
-    {
       method: "shell.run",
       params: {
         venv: "env",
@@ -35,6 +24,23 @@ module.exports = {
           // "AttributeError: module 'torch' has no attribute 'float8_e8m0fnu'"
           "uv pip install hf_xet transformers==4.50.3"
         ]
+      }
+    },
+    {
+      // Pin the platform/gpu-correct torch stack AFTER the editable install:
+      // f5-tts depends on an unpinned "torchcodec", whose recent releases require
+      // a newer torch, so "uv pip install -e ." can upgrade torch/torchaudio to
+      // versions that mismatch each other (and torch-directml), breaking the venv
+      // with "OSError: [WinError 127]". Running torch.js last forces the stack
+      // back to the pinned, matching versions.
+      method: "script.start",
+      params: {
+        uri: "torch.js",
+        params: {
+          venv: "env",
+          path: "app",
+          // xformers: true
+        }
       }
     },
     {
